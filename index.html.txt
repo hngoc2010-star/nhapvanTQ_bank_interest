@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Plywood Import Cost</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Plywood Cost">
+    
+    <style>
+        :root {
+            --bg-color: #f2f2f7;
+            --card-bg: #ffffff;
+            --text-color: #000000;
+            --text-secondary: #8e8e93;
+            --border-color: #e5e5ea;
+            --accent-color: #007aff;
+            --danger-color: #ff3b30;
+            --safe-area-top: env(safe-area-inset-top, 0px);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #000000;
+                --card-bg: #1c1c1e;
+                --text-color: #ffffff;
+                --text-secondary: #8e8e93;
+                --border-color: #38383a;
+                --accent-color: #0a84ff;
+                --danger-color: #ff453a;
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            padding-top: calc(var(--safe-area-top) + 2px);
+            padding-bottom: env(safe-area-inset-bottom, 5px);
+        }
+
+        header {
+            padding: 2px 10px;
+            background-color: var(--bg-color);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 17px;
+            font-weight: 700;
+        }
+
+        .header-btns {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-ios {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-ios.secondary {
+            background-color: var(--border-color);
+            color: var(--accent-color);
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 0 10px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .main-content.scrollable {
+            overflow-y: auto !important;
+        }
+        .main-content.fixed {
+            overflow: hidden !important;
+        }
+
+        .segmented-control {
+            display: flex;
+            background-color: var(--border-color);
+            padding: 2px;
+            border-radius: 8px;
+            margin: 4px 0;
+        }
+
+        .segmented-control label {
+            flex: 1;
+            text-align: center;
+            padding: 3px 0;
+            font-size: 11px;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .segmented-control input {
+            display: none;
+        }
+
+        .segmented-control input:checked + label {
+            background-color: var(--card-bg);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            font-weight: 600;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 6px 10px;
+            margin-bottom: 6px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+        }
+
+        .card-title {
+            font-size: 12.5px;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 2px; /* Thu hẹp khoảng cách với dòng dữ liệu bên dưới */
+            color: var(--accent-color);
+        }
+
+        .form-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .form-row:last-child {
+            border-bottom: none;
+        }
+
+        .form-row label {
+            font-size: 12px;
+            font-weight: 500;
+            flex: 1;
+        }
+
+        .input-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            width: 60%;
+            gap: 4px;
+        }
+
+        .input-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            flex: 1;
+            width: 100%;
+        }
+
+        .unit-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            min-width: 28px;
+            text-align: right;
+        }
+
+        select, input.num-input {
+            width: 100%;
+            text-align: right;
+            border: none;
+            background: transparent;
+            font-size: 13px;
+            color: var(--text-color);
+            padding: 1px 0;
+            outline: none;
+        }
+
+        select {
+            direction: rtl;
+            font-weight: 500;
+        }
+
+        .error-msg {
+            color: var(--danger-color);
+            font-size: 9px;
+            margin-top: 1px;
+            display: none;
+            text-align: right;
+        }
+
+        .out-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 0;
+            font-size: 12px;
+        }
+
+        .out-row.total-section {
+            border-top: 1px solid var(--border-color);
+            margin-top: 4px;
+            padding-top: 5px;
+        }
+
+        .out-row.total-title {
+            font-weight: 700;
+            font-size: 14.5px;
+            color: var(--danger-color);
+            margin-bottom: 2px;
+        }
+        
+        .out-row.total-sheet-cost {
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--accent-color);
+            padding-left: 8px;
+            margin-top: 1px;
+        }
+
+        .out-row.total-sheet {
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-content">
+            <h1>Plywood Import</h1>
+            <div class="header-btns">
+                <button class="btn-ios secondary" onclick="resetForm()">Reset</button>
+                <button class="btn-ios" onclick="copySummary()">Copy</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-content" id="mainContent">
+        <div class="segmented-control">
+            <input type="radio" name="numProd" id="p1" value="1" checked onclick="toggleProducts()">
+            <label for="p1">① Product</label>
+            <input type="radio" name="numProd" id="p2" value="2" onclick="toggleProducts()">
+            <label for="p2">② Products</label>
+            <input type="radio" name="numProd" id="p3" value="3" onclick="toggleProducts()">
+            <label for="p3">③ Products</label>
+        </div>
+
+        <div id="productsContainer"></div>
+
+        <div class="card">
+            <div class="card-title">Chi Phí Chung</div>
+            
+            <div class="form-row">
+                <label>Import Tax</label>
+                <div class="input-container">
+                    <div class="input-wrapper">
+                        <select id="importTax" onchange="calculate()">
+                            <option value="0">0%</option>
+                            <option value="5">5%</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label>VAT</label>
+                <div class="input-container">
+                    <span style="font-size: 13px; font-weight: 500;">8%</span>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label>USD Rate</label>
+                <div class="input-container">
+                    <div class="input-wrapper">
+                        <input type="email" id="usdRate" class="num-input" value="26,300" oninput="handleNumericInput(this)">
+                        <div class="error-msg" id="err-usdRate">Bắt buộc</div>
+                    </div>
+                    <span class="unit-label">VND</span>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label>Transportation</label>
+                <div class="input-container">
+                    <div class="input-wrapper">
+                        <input type="email" id="transCost" class="num-input" value="8,500,000" oninput="handleNumericInput(this)">
+                        <div class="error-msg" id="err-transCost">Bắt buộc</div>
+                    </div>
+                    <span class="unit-label">VND</span>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label>Commission</label>
+                <div class="input-container">
+                    <div class="input-wrapper">
+                        <input type="email" id="commission" class="num-input" value="2,000" oninput="handleNumericInput(this)">
+                        <div class="error-msg" id="err-commission">Bắt buộc</div>
+                    </div>
+                    <span class="unit-label">/Tấm</span>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label>Bank Interest</label>
+                <div class="input-container">
+                    <div class="input-wrapper">
+                        <input type="email" id="interestInputVND" class="num-input" value="850,000" oninput="handleNumericInput(this)">
+                        <div class="error-msg" id="err-interestInputVND">Bắt buộc</div>
+                    </div>
+                    <span class="unit-label">VND</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="margin-bottom: 0; flex-shrink: 0;">
+            <div class="card-title">Kết Quả</div>
+            <div class="out-row"><span>Total Sheets</span><span id="outTotalSheets" class="out-row total-sheet">0</span></div>
+            <div class="out-row"><span>Total CBM</span><span id="outTotalCBM">0.00</span></div>
+            <div class="out-row"><span>DDU Value (USD)</span><span id="outDDUUSD">$0</span></div>
+            <div class="out-row"><span>Import Tax (VND)</span><span id="outTaxVND">0</span></div>
+            <div class="out-row"><span>VAT (VND)</span><span id="outVatVND">0</span></div>
+            <div class="out-row"><span>Transportation (VND)</span><span id="outTransVND">0</span></div>
+            <div class="out-row"><span>Commission (VND)</span><span id="outCommVND">0</span></div>
+            
+            <!-- Vùng hiển thị TOTAL COST & Cost/Sheet chi tiết lồng bên trong -->
+            <div class="total-section" style="border-top: 1px solid var(--border-color); margin-top: 4px; padding-top: 5px;">
+                <div class="out-row total-title">
+                    <span>TOTAL COST</span>
+                    <span id="outTotalCost">0 VND</span>
+                </div>
+                <div id="individualCostsContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const container = document.getElementById('productsContainer');
+        let html = '';
+        for(let i=1; i<=3; i++) {
+            html += `
+            <div class="card product-card" id="card-p${i}">
+                <div class="card-title">Product ${i}</div>
+                <div class="form-row">
+                    <label>Size</label>
+                    <div class="input-container">
+                        <div class="input-wrapper">
+                            <select id="size-${i}" onchange="calculate()">
+                                <option value="3x6">3 × 6 (0.91m × 1.82m)</option>
+                                <option value="4x8">4 × 8 (1.22m × 2.44m)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <label>Thickness</label>
+                    <div class="input-container">
+                        <div class="input-wrapper">
+                            <input type="email" id="thick-${i}" class="num-input" value="18" oninput="handleNumericInput(this)">
+                            <div class="error-msg" id="err-thick-${i}">Phải > 0</div>
+                        </div>
+                        <span class="unit-label">mm</span>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <label>Bundles</label>
+                    <div class="input-container">
+                        <div class="input-wrapper">
+                            <input type="email" id="bundles-${i}" class="num-input" value="10" oninput="handleNumericInput(this)">
+                            <div class="error-msg" id="err-bundles-${i}">Phải > 0</div>
+                        </div>
+                        <span class="unit-label">Kiện</span>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <label>PCS / Bundle</label>
+                    <div class="input-container">
+                        <div class="input-wrapper">
+                            <input type="email" id="pcs-${i}" class="num-input" value="50" oninput="handleNumericInput(this)">
+                            <div class="error-msg" id="err-pcs-${i}">Phải > 0</div>
+                        </div>
+                        <span class="unit-label">Tấm</span>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <label>DDU Price</label>
+                    <div class="input-container">
+                        <div class="input-wrapper">
+                            <input type="email" id="ddu-${i}" class="num-input" value="10.08" oninput="handleNumericInput(this)">
+                            <div class="error-msg" id="err-ddu-${i}">Phải > 0</div>
+                        </div>
+                        <span class="unit-label">USD</span>
+                    </div>
+                </div>
+            </div>`;
+        }
+        container.innerHTML = html;
+
+        function formatNumber(num) {
+            if(isNaN(num)) return "0";
+            let parts = num.toString().split(".");
+            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            return parts.join(".");
+        }
+
+        function parseNumber(str) {
+            return parseFloat(str.replace(/,/g, '')) || 0;
+        }
+
+        function handleNumericInput(input) {
+            let val = input.value.replace(/[^0-9.,]/g, '');
+            val = val.replace(/,/g, '.');
+
+            if (val.endsWith('.')) {
+                let dots = val.split('.');
+                if(dots.length > 2) {
+                    val = dots[0] + '.' + dots.slice(1).join('').replace(/\./g, '');
+                }
+                input.value = val;
+                return; 
+            }
+            
+            let dots = val.split('.');
+            if (dots.length > 2) {
+                val = dots[0] + '.' + dots.slice(1).join('');
+            }
+
+            let parsed = parseFloat(val);
+            if(!isNaN(parsed)) {
+                input.value = formatNumber(val);
+            } else {
+                input.value = val;
+            }
+            validateAndCalculate();
+        }
+
+        function toggleProducts() {
+            const activeCount = parseInt(document.querySelector('input[name="numProd"]:checked').value);
+            const mainContent = document.getElementById('mainContent');
+            
+            if(activeCount >= 2) {
+                mainContent.classList.remove('fixed');
+                mainContent.classList.add('scrollable');
+            } else {
+                mainContent.classList.remove('scrollable');
+                mainContent.classList.add('fixed');
+                mainContent.scrollTop = 0;
+            }
+
+            for(let i=1; i<=3; i++) {
+                const card = document.getElementById(`card-p${i}`);
+                if(i <= activeCount) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            }
+            validateAndCalculate();
+        }
+
+        let globalSummary = {};
+
+        function validateAndCalculate() {
+            let hasError = false;
+            const activeCount = parseInt(document.querySelector('input[name="numProd"]:checked').value);
+            
+            ['usdRate', 'transCost', 'commission', 'interestInputVND'].forEach(id => {
+                const input = document.getElementById(id);
+                const err = document.getElementById(`err-${id}`);
+                if(input.value === "" || (id !== 'interestInputVND' && parseNumber(input.value) <= 0)) {
+                    err.style.display = 'block';
+                    hasError = true;
+                } else {
+                    err.style.display = 'none';
+                }
+            });
+
+            for(let i=1; i<=activeCount; i++) {
+                ['thick', 'bundles', 'pcs', 'ddu'].forEach(field => {
+                    const input = document.getElementById(`${field}-${i}`);
+                    const err = document.getElementById(`err-${field}-${i}`);
+                    if(parseNumber(input.value) <= 0) {
+                        err.style.display = 'block';
+                        hasError = true;
+                    } else {
+                        err.style.display = 'none';
+                    }
+                });
+            }
+
+            if(hasError) return;
+            calculate();
+        }
+
+        function calculate() {
+            const activeCount = parseInt(document.querySelector('input[name="numProd"]:checked').value);
+            
+            let totalSheets = 0;
+            let totalCBM = 0;
+            let totalDDUUSD = 0;
+
+            const taxRate = parseNumber(document.getElementById('importTax').value) / 100;
+            const vatRate = 0.08;
+            const usdRate = parseNumber(document.getElementById('usdRate').value);
+            const transCostVND = parseNumber(document.getElementById('transCost').value);
+            const commVNDPerSheet = parseNumber(document.getElementById('commission').value);
+            const globalInterestVND = parseNumber(document.getElementById('interestInputVND').value);
+
+            let productData = [];
+
+            for(let i=1; i<=activeCount; i++) {
+                const size = document.getElementById(`size-${i}`).value;
+                const thickRaw = document.getElementById(`thick-${i}`).value;
+                const thick = parseNumber(thickRaw) / 1000;
+                const bundles = parseNumber(document.getElementById(`bundles-${i}`).value);
+                const pcs = parseNumber(document.getElementById(`pcs-${i}`).value);
+                const dduSheet = parseNumber(document.getElementById(`ddu-${i}`).value);
+
+                let w = 0.91, l = 1.82;
+                if(size === '4x8') { w = 1.22; l = 2.44; }
+
+                const sheets = bundles * pcs;
+                const cbm = w * l * thick * sheets;
+                const dduValUSD = sheets * dduSheet;
+                const dduValVND = dduValUSD * usdRate;
+
+                const taxVND = dduValVND * taxRate;
+                const vatVND = (dduValVND + taxVND) * vatRate;
+
+                totalSheets += sheets;
+                totalCBM += cbm;
+                totalDDUUSD += dduValUSD;
+
+                productData.push({
+                    id: i,
+                    label: `${thickRaw}mm x ${size}`,
+                    sheets: sheets,
+                    cbm: cbm,
+                    dduVND: dduValVND,
+                    taxVND: taxVND,
+                    vatVND: vatVND
+                });
+            }
+
+            const dduVNDTotal = totalDDUUSD * usdRate;
+            const taxVNDTotal = dduVNDTotal * taxRate;
+            const vatVNDTotal = (dduVNDTotal + taxVNDTotal) * vatRate;
+            const totalCommVND = totalSheets * commVNDPerSheet;
+            
+            // Tổng chi phí cuối cùng cộng thêm phần Bank Interest sếp nhập ở trên
+            const totalCostVND = dduVNDTotal + taxVNDTotal + vatVNDTotal + transCostVND + totalCommVND + globalInterestVND;
+
+            let individualCostsHtml = '';
+            let copyDetailsStr = '';
+
+            productData.forEach(p => {
+                // Phân bổ chi phí vận chuyển theo khối lượng CBM
+                const allocatedTrans = totalCBM > 0 ? (p.cbm / totalCBM) * transCostVND : 0;
+                // Phân bổ chi phí lãi vay ngân hàng theo khối lượng CBM
+                const allocatedInterest = totalCBM > 0 ? (p.cbm / totalCBM) * globalInterestVND : 0;
+                const allocatedComm = p.sheets * commVNDPerSheet;
+
+                const totalProductCost = p.dduVND + p.taxVND + p.vatVND + allocatedInterest + allocatedTrans + allocatedComm;
+                const unitCost = p.sheets > 0 ? (totalProductCost / p.sheets) : 0;
+
+                p.costPerSheet = Math.round(unitCost);
+
+                // Hiển thị danh sách Cost / Sheet lồng ngay dưới dòng TOTAL COST
+                individualCostsHtml += `
+                    <div class="out-row total-sheet-cost">
+                        <span>↳ Cost / Sheet (${p.label})</span>
+                        <span>${formatNumber(p.costPerSheet)} VND</span>
+                    </div>
+                `;
+                copyDetailsStr += `Cost/Sheet (${p.label}): ${formatNumber(p.costPerSheet)} VND\n`;
+            });
+
+            document.getElementById('individualCostsContainer').innerHTML = individualCostsHtml;
+
+            document.getElementById('outTotalSheets').innerText = formatNumber(totalSheets);
+            document.getElementById('outTotalCBM').innerText = totalCBM.toFixed(2);
+            document.getElementById('outDDUUSD').innerText = '$' + formatNumber(totalDDUUSD.toFixed(2));
+            document.getElementById('outTaxVND').innerText = formatNumber(Math.round(taxVNDTotal));
+            document.getElementById('outVatVND').innerText = formatNumber(Math.round(vatVNDTotal));
+            document.getElementById('outTransVND').innerText = formatNumber(transCostVND);
+            document.getElementById('outCommVND').innerText = formatNumber(Math.round(totalCommVND));
+            document.getElementById('outTotalCost').innerText = formatNumber(Math.round(totalCostVND)) + " VND";
+
+            globalSummary = {
+                sheets: formatNumber(totalSheets),
+                cbm: totalCBM.toFixed(2),
+                totalCost: formatNumber(Math.round(totalCostVND)) + " VND",
+                details: copyDetailsStr
+            };
+
+            saveToLocalStorage();
+        }
+
+        function saveToLocalStorage() {
+            const data = {
+                numProd: document.querySelector('input[name="numProd"]:checked').value,
+                tax: document.getElementById('importTax').value,
+                rate: document.getElementById('usdRate').value,
+                trans: document.getElementById('transCost').value,
+                comm: document.getElementById('commission').value,
+                interestVND: document.getElementById('interestInputVND').value,
+                prods: []
+            };
+
+            for(let i=1; i<=3; i++) {
+                if(document.getElementById(`size-${i}`)) {
+                    data.prods.push({
+                        size: document.getElementById(`size-${i}`).value,
+                        thick: document.getElementById(`thick-${i}`).value,
+                        bundles: document.getElementById(`bundles-${i}`).value,
+                        pcs: document.getElementById(`pcs-${i}`).value,
+                        ddu: document.getElementById(`ddu-${i}`).value
+                    });
+                }
+            }
+            localStorage.setItem('plywood_calc_data', JSON.stringify(data));
+        }
+
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem('plywood_calc_data');
+            if(!saved) {
+                toggleProducts();
+                return;
+            }
+            try {
+                const data = JSON.parse(saved);
+                document.querySelector(`input[name="numProd"][value="${data.numProd}"]`).checked = true;
+                document.getElementById('importTax').value = data.tax;
+                document.getElementById('usdRate').value = data.rate;
+                document.getElementById('transCost').value = data.trans;
+                document.getElementById('commission').value = data.comm;
+                if(data.interestVND) document.getElementById('interestInputVND').value = data.interestVND;
+
+                data.prods.forEach((p, index) => {
+                    let i = index + 1;
+                    if(document.getElementById(`size-${i}`)) {
+                        document.getElementById(`size-${i}`).value = p.size;
+                        document.getElementById(`thick-${i}`).value = p.thick;
+                        document.getElementById(`bundles-${i}`).value = p.bundles;
+                        document.getElementById(`pcs-${i}`).value = p.pcs;
+                        document.getElementById(`ddu-${i}`).value = p.ddu;
+                    }
+                });
+            } catch(e) { console.error(e); }
+            toggleProducts();
+        }
+
+        function resetForm() {
+            localStorage.removeItem('plywood_calc_data');
+            document.getElementById('p1').checked = true;
+            document.getElementById('importTax').value = "0";
+            document.getElementById('usdRate').value = "26,300";
+            document.getElementById('transCost').value = "8,500,000";
+            document.getElementById('commission').value = "2,000";
+            document.getElementById('interestInputVND').value = "850,000";
+
+            for(let i=1; i<=3; i++) {
+                if(document.getElementById(`size-${i}`)) {
+                    document.getElementById(`size-${i}`).value = "3x6";
+                    document.getElementById(`thick-${i}`).value = "18";
+                    document.getElementById(`bundles-${i}`).value = "10";
+                    document.getElementById(`pcs-${i}`).value = "50";
+                    document.getElementById(`ddu-${i}`).value = "10.08";
+                }
+            }
+            toggleProducts();
+        }
+
+        function copySummary() {
+            let text = `Plywood Import Cost\n\nTotal Sheets: ${globalSummary.sheets}\nCBM: ${globalSummary.cbm}\n\n`;
+            if(globalSummary.details) {
+                text += `${globalSummary.details}`;
+            }
+            text += `Total Cost: ${globalSummary.totalCost}`;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                alert("Đã copy summary vào bộ nhớ tạm!");
+            }).catch(err => {
+                alert("Lỗi sao chép dữ liệu.");
+            });
+        }
+
+        window.onload = () => {
+            loadFromLocalStorage();
+        };
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed:', err));
+        }
+    </script>
+</body>
+</html>
